@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>loan_calculator_whatsapp_chatbot</RootNamespace>
+    <UserSecretsId>0c13f472-3989-4cc5-9b49-a8c1d1efced4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LiteDb" Version="5.0.10" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="Twilio" Version="5.54.0" />
+    <PackageReference Include="Twilio.AspNet.Common" Version="5.37.2" />
+    <PackageReference Include="Twilio.AspNet.Core" Version="5.37.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="App_Data\LiteDb.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
