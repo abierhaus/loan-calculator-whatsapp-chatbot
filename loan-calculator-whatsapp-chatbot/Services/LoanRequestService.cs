@@ -57,7 +57,7 @@ namespace loan_calculator_whatsapp_chatbot.Services
             //Get last one
             var lastOpenResponse = responsesForNumber.OrderByDescending(x => x.Message.CreatedDate).FirstOrDefault();
 
-
+            //Init conversation if a) user did not used the chatbot before, last response was finished or when using the internal stopword
             if (lastOpenResponse == null || lastOpenResponse.Status == ResponseModel.StatusEnum.Finished || message.Body.Contains("Start over"))
             {
                 responseModel.Status = ResponseModel.StatusEnum.Step0;
@@ -66,18 +66,19 @@ namespace loan_calculator_whatsapp_chatbot.Services
             }
             else
             {
+                //Build next response based on the last response status. You might introduce a status machine here
                 switch (lastOpenResponse.Status)
                 {
                     case ResponseModel.StatusEnum.Step0:
                         responseModel.Loan = new LoanModel();
-                        responseModel.Loan.PurchasePrice = await ParseInputAsDecimal(message.Body);
+                        responseModel.Loan.PurchasePrice = await ParseInputAsDecimalAsync(message.Body);
                         responseModel.Status = ResponseModel.StatusEnum.Step1;
                         responseModel.Body = "Please provide us with your desired terms in years";
                         break;
 
                     case ResponseModel.StatusEnum.Step1:
                         responseModel.Loan = lastOpenResponse.Loan;
-                        responseModel.Loan.LoanTermYears = await ParseInputAsDecimal(message.Body);
+                        responseModel.Loan.LoanTermYears = await ParseInputAsDecimalAsync(message.Body);
                         responseModel.Rate = LoanCalculatorService.CalculatePayment(responseModel.Loan);
                         responseModel.Status = ResponseModel.StatusEnum.Finished;
                         responseModel.Body = $"Your monthly rate is {responseModel.Rate}";
@@ -86,13 +87,18 @@ namespace loan_calculator_whatsapp_chatbot.Services
             }
 
 
-            //Insert result
+            //Insert result to database
             await InsertAsync(responseModel);
 
             return responseModel;
         }
 
-        private async Task<decimal> ParseInputAsDecimal(string input)
+        /// <summary>
+        /// Removes all non-numeric characters
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private async Task<decimal> ParseInputAsDecimalAsync(string input)
         {
             var num = decimal.Parse(new string(input.Where(char.IsDigit).ToArray()));
 
